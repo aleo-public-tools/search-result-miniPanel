@@ -11,6 +11,7 @@ VS Code 已有内置全局搜索面板，但它偏向完整侧边栏工作流。
 - 用户希望搜索结果窗口可固定、可清空、可二次过滤、可点击跳转。
 - 用户希望对当前文件的搜索结果具备轻量、即时、低打扰体验。
 - 用户希望继续使用 VS Code 原生 `Cmd+F` / `Ctrl+F` Find Widget 输入搜索词，并能把同一个搜索词一键发送到插件结果小窗。
+- 用户希望常用搜索动作可以通过快捷键触发，并且能够在 VS Code Keyboard Shortcuts 中自定义。
 
 ## 2. 产品定位
 
@@ -39,6 +40,7 @@ VS Code 已有内置全局搜索面板，但它偏向完整侧边栏工作流。
 - 支持正则表达式开关。
 - 每条结果显示行号、列号、匹配行文本。
 - 点击结果后编辑器跳转到对应位置并选中匹配内容。
+- 当用户已选中单行文本并触发当前文件搜索快捷键时，直接使用选中文本作为搜索词执行搜索，不再弹出输入框等待 Enter。
 
 ### 3.2 工作区搜索
 
@@ -86,6 +88,18 @@ VS Code 已有内置全局搜索面板，但它偏向完整侧边栏工作流。
 - 原生 Find Widget 的普通查找行为不被破坏。
 - 插件触发过程不永久污染用户剪贴板。
 
+### 3.6 快捷键自定义
+
+作为开发者，我希望插件的常用命令都能绑定快捷键，并且我可以根据自己的习惯修改这些快捷键。
+
+验收标准：
+
+- 插件为当前文件搜索、选区搜索、工作区搜索、展示结果面板、原生 Find Widget 联动提供默认快捷键。
+- 默认快捷键尽量避开 VS Code 内置 `Cmd+F` / `Ctrl+F`、全局搜索、替换等高频组合。
+- 用户可以在 VS Code `Preferences: Open Keyboard Shortcuts` 中搜索 `Search Result Mini Panel` 并修改任意命令快捷键。
+- 用户可以通过配置关闭插件默认快捷键集合，仅保留自己定义的快捷键。
+- 原生 Find Widget 联动快捷键可单独关闭。
+
 ## 4. 功能范围
 
 ### 4.1 首版必备功能
@@ -117,6 +131,11 @@ VS Code 已有内置全局搜索面板，但它偏向完整侧边栏工作流。
   - 展开全部。
   - 折叠全部。
   - 复制结果。
+- 快捷键：
+  - 默认快捷键覆盖当前文件搜索、选区搜索、工作区搜索、展示结果面板。
+  - 原生 Find Widget 聚焦时支持一键发送当前 query 到结果面板。
+  - 支持通过 VS Code Keyboard Shortcuts 自定义所有命令快捷键。
+  - 支持通过配置关闭默认快捷键。
 
 ### 4.2 后续增强功能
 
@@ -503,16 +522,19 @@ function buildMatcher(query: string, options: SearchOptions): RegExp {
 流程：
 
 1. 获取当前 active editor。
-2. 根据 scope 决定搜索全文或选区。
-3. 编译 matcher。
-4. 在文本中循环 `regexp.exec(text)`。
-5. 将 offset 转为 document position。
-6. 提取匹配所在行作为 preview。
-7. 生成 `SearchMatch`。
+2. 如果触发的是当前文件搜索命令，且当前 editor 存在非空单行选区，则将选中文本作为 query 立即执行当前文件搜索。
+3. 如果没有可用单行选区，则根据命令入口弹出输入框获取 query。
+4. 根据 scope 决定搜索全文或选区。
+5. 编译 matcher。
+6. 在文本中循环 `regexp.exec(text)`。
+7. 将 offset 转为 document position。
+8. 提取匹配所在行作为 preview。
+9. 生成 `SearchMatch`。
 
 边界处理：
 
 - 空查询直接提示用户。
+- 选区跨多行时不自动作为 query，继续弹出输入框，避免误用大段文本搜索。
 - 正则空匹配时手动推进 `lastIndex`。
 - 多行匹配首版可支持定位，但 preview 只展示起始行；后续再做多行预览。
 
@@ -670,6 +692,11 @@ type WebviewToExtensionMessage =
     "default": 0,
     "description": "Number of context lines shown before and after each match."
   },
+  "searchResultMiniPanel.enableDefaultKeybindings": {
+    "type": "boolean",
+    "default": true,
+    "description": "Enable Search Result Mini Panel's default shortcut set."
+  },
   "searchResultMiniPanel.enableFindWidgetKeybinding": {
     "type": "boolean",
     "default": true,
@@ -703,12 +730,24 @@ type WebviewToExtensionMessage =
 
 默认快捷键需谨慎，避免与 VS Code 内置搜索冲突。
 
-建议：
+建议默认绑定：
 
-- 当前文件搜索：不默认绑定，用户自行配置。
-- 搜索选中文本：可提供建议绑定 `Ctrl+Alt+F` / `Cmd+Alt+F`。
-- 展示结果面板：可提供建议绑定 `Ctrl+Alt+R` / `Cmd+Alt+R`。
-- 原生 Find Widget 联动：建议默认绑定 `Cmd+Shift+Enter` / `Ctrl+Shift+Enter`，when clause 为 `findWidgetVisible && inputFocus && config.searchResultMiniPanel.enableFindWidgetKeybinding`。该快捷键只在 Find Widget 输入框聚焦时生效，避免覆盖编辑器正文快捷键。
+| 功能 | macOS | Windows/Linux | when clause |
+| --- | --- | --- | --- |
+| 当前文件搜索 | `Cmd+Option+Shift+F` | `Ctrl+Alt+Shift+F` | `editorTextFocus && config.searchResultMiniPanel.enableDefaultKeybindings` |
+| 选区搜索 | `Cmd+Option+Shift+S` | `Ctrl+Alt+Shift+S` | `editorTextFocus && editorHasSelection && config.searchResultMiniPanel.enableDefaultKeybindings` |
+| 工作区搜索 | `Cmd+Option+Shift+W` | `Ctrl+Alt+Shift+W` | `editorTextFocus && workspaceFolderCount != 0 && config.searchResultMiniPanel.enableDefaultKeybindings` |
+| 展示结果面板 | `Cmd+Option+Shift+R` | `Ctrl+Alt+Shift+R` | `config.searchResultMiniPanel.enableDefaultKeybindings` |
+| 原生 Find Widget 联动 | `Cmd+Shift+Enter` | `Ctrl+Shift+Enter` | `findWidgetVisible && inputFocus && config.searchResultMiniPanel.enableFindWidgetKeybinding` |
+
+自定义策略：
+
+- 所有插件命令都必须通过 `contributes.commands` 暴露，确保用户能在 VS Code Keyboard Shortcuts 中搜索并改键。
+- 默认快捷键只作为开箱即用体验，不能成为唯一入口。
+- `searchResultMiniPanel.enableDefaultKeybindings` 用于整体关闭插件默认快捷键集合。
+- `searchResultMiniPanel.enableFindWidgetKeybinding` 用于单独关闭原生 Find Widget 联动快捷键。
+- 用户自定义快捷键不依赖上述开关；用户在 `keybindings.json` 中直接绑定命令即可。
+- 当前文件搜索快捷键有选区优化：当 editor 中存在非空单行选中文本时，直接将选中文本作为 query 执行搜索；没有选区或选区跨多行时再显示输入框。
 
 ## 14. 文件结构建议
 

@@ -14,6 +14,18 @@ export class SearchController {
   ) {}
 
   async searchInCurrentFile(): Promise<void> {
+    const selectedQuery = getSelectedSingleLineQuery();
+    if (selectedQuery) {
+      await this.executeSearch({
+        id: createRequestId(),
+        query: selectedQuery,
+        scope: 'currentFile',
+        options: getSearchOptions(),
+        createdAt: Date.now()
+      });
+      return;
+    }
+
     await this.runInteractiveSearch('currentFile');
   }
 
@@ -165,4 +177,18 @@ export async function revealResultsPanel(): Promise<void> {
 
 function createRequestId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function getSelectedSingleLineQuery(): string | undefined {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || editor.selection.isEmpty) {
+    return undefined;
+  }
+
+  const selectedText = editor.document.getText(editor.selection);
+  if (!selectedText || selectedText.includes('\n') || selectedText.includes('\r')) {
+    return undefined;
+  }
+
+  return selectedText.trim() ? selectedText : undefined;
 }

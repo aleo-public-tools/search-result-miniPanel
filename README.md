@@ -27,6 +27,8 @@ VS Code's built-in Search view is powerful, but it lives in the side bar and is 
 4. Review matches in the `Search Results` panel.
 5. Click any matched line to jump to the source location.
 
+Tip: if you select text in the editor and run `Search Result Mini Panel: Search In Current File`, the extension searches immediately with the selected text as the query.
+
 You can also select text in the editor and run `Search Result Mini Panel: Search Selection In Current File`.
 
 ## Native Find Widget Workflow
@@ -50,6 +52,29 @@ This keeps the normal VS Code Find experience intact while adding a Notepad++ st
 | `Search Result Mini Panel: Clear Results` | Clear the result panel. |
 | `Search Result Mini Panel: Reveal Results` | Show the Search Results panel. |
 
+## Keyboard Shortcuts
+
+| Action | macOS | Windows/Linux |
+| --- | --- | --- |
+| Search in current file | `Cmd+Option+Shift+F` | `Ctrl+Alt+Shift+F` |
+| Search selection in current file | `Cmd+Option+Shift+S` | `Ctrl+Alt+Shift+S` |
+| Search in workspace | `Cmd+Option+Shift+W` | `Ctrl+Alt+Shift+W` |
+| Reveal result panel | `Cmd+Option+Shift+R` | `Ctrl+Alt+Shift+R` |
+| Send native Find query to panel | `Cmd+Shift+Enter` | `Ctrl+Shift+Enter` |
+
+When text is selected, the current-file shortcut searches immediately with that selected text. No input box or Enter key is required.
+
+![Search Result Mini Panel icon search in current file](resources/search_01.png)
+![Search Result Mini Panel icon search in current panel](resources/search_in_search_001.png)
+
+You can customize every shortcut in VS Code:
+
+1. Open `Preferences: Open Keyboard Shortcuts`.
+2. Search for `Search Result Mini Panel`.
+3. Edit or remove the binding for any command.
+
+If you want to define all shortcuts yourself, set `searchResultMiniPanel.enableDefaultKeybindings` to `false`. The native Find Widget shortcut can be disabled separately with `searchResultMiniPanel.enableFindWidgetKeybinding`.
+
 ## Configuration
 
 | Setting | Default | Description |
@@ -61,6 +86,7 @@ This keeps the normal VS Code Find experience intact while adding a Notepad++ st
 | `searchResultMiniPanel.defaultSearchScope` | `currentFile` | Default search scope for future UI expansion. |
 | `searchResultMiniPanel.contextLines` | `0` | Reserved for showing context lines around each match. |
 | `searchResultMiniPanel.excludeGlob` | `**/{node_modules,.git,out,dist,build}/**` | Files and folders excluded from workspace search. |
+| `searchResultMiniPanel.enableDefaultKeybindings` | `true` | Enable the default shortcut set for panel commands. |
 | `searchResultMiniPanel.enableFindWidgetKeybinding` | `true` | Enable the shortcut that sends the native editor Find query to the panel. |
 
 ## Known Limitations
@@ -96,4 +122,4 @@ Open this folder in VS Code and press `F5` to launch an Extension Development Ho
 
 ### 0.1.0
 
-Initial release with current-file, selection, and workspace search, native Find Widget query capture, a bottom result panel, local filtering, grouped results, copy/refresh/clear actions, and click-to-jump navigation.
+Initial release with current-file, selection, and workspace search, customizable shortcut support, native Find Widget query capture, a bottom result panel, local filtering, grouped results, copy/refresh/clear actions, and click-to-jump navigation.

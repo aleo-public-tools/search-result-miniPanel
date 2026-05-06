@@ -120,6 +120,30 @@
     },
     "keybindings": [
       {
+        "command": "searchResultMiniPanel.searchInCurrentFile",
+        "key": "ctrl+alt+shift+f",
+        "mac": "cmd+alt+shift+f",
+        "when": "editorTextFocus && config.searchResultMiniPanel.enableDefaultKeybindings"
+      },
+      {
+        "command": "searchResultMiniPanel.searchSelectionInCurrentFile",
+        "key": "ctrl+alt+shift+s",
+        "mac": "cmd+alt+shift+s",
+        "when": "editorTextFocus && editorHasSelection && config.searchResultMiniPanel.enableDefaultKeybindings"
+      },
+      {
+        "command": "searchResultMiniPanel.searchInWorkspace",
+        "key": "ctrl+alt+shift+w",
+        "mac": "cmd+alt+shift+w",
+        "when": "editorTextFocus && workspaceFolderCount != 0 && config.searchResultMiniPanel.enableDefaultKeybindings"
+      },
+      {
+        "command": "searchResultMiniPanel.revealPanel",
+        "key": "ctrl+alt+shift+r",
+        "mac": "cmd+alt+shift+r",
+        "when": "config.searchResultMiniPanel.enableDefaultKeybindings"
+      },
+      {
         "command": "searchResultMiniPanel.searchFromFindWidget",
         "key": "ctrl+shift+enter",
         "mac": "cmd+shift+enter",
@@ -174,6 +198,11 @@
           "type": "string",
           "default": "**/{node_modules,.git,out,dist,build}/**",
           "description": "Default exclude glob used for workspace searches."
+        },
+        "searchResultMiniPanel.enableDefaultKeybindings": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Search Result Mini Panel's default shortcut set. Turn this off if you prefer to define all shortcuts yourself in Keyboard Shortcuts."
         },
         "searchResultMiniPanel.enableFindWidgetKeybinding": {
           "type": "boolean",
