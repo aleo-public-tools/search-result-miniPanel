@@ -12,6 +12,7 @@ VS Code's built-in Search view is powerful, but it lives in the side bar and is 
 
 - **Notepad++ style result panel**: matched lines are grouped by file in a bottom Panel view.
 - **Click-to-jump navigation**: open the source file, reveal the match, and select the matched range.
+- **Native Find Widget bridge**: press `Cmd+F`, type in VS Code's editor Find box, then send that query to the result panel.
 - **Flexible search scope**: search the current file, the current selection, or the whole workspace.
 - **Local result filtering**: narrow visible results by file path or line text without running a new search.
 - **Compact file groups**: expand, collapse, refresh, clear, and copy visible results.
@@ -28,6 +29,15 @@ VS Code's built-in Search view is powerful, but it lives in the side bar and is 
 
 You can also select text in the editor and run `Search Result Mini Panel: Search Selection In Current File`.
 
+## Native Find Widget Workflow
+
+1. Press `Cmd+F` on macOS or `Ctrl+F` on Windows/Linux.
+2. Type your search query in VS Code's native editor Find box.
+3. Keep the Find box focused and press `Cmd+Shift+Enter` on macOS or `Ctrl+Shift+Enter` on Windows/Linux.
+4. The current Find query is sent to Search Result Mini Panel and all matches in the active editor are shown in the bottom panel.
+
+This keeps the normal VS Code Find experience intact while adding a Notepad++ style result list for the same query.
+
 ## Commands
 
 | Command | Description |
@@ -35,6 +45,7 @@ You can also select text in the editor and run `Search Result Mini Panel: Search
 | `Search Result Mini Panel: Search In Current File` | Search the active editor. |
 | `Search Result Mini Panel: Search Selection In Current File` | Search only the selected range in the active editor. |
 | `Search Result Mini Panel: Search In Workspace` | Search files in the current workspace. |
+| `Search Result Mini Panel: Show Find Widget Results` | Send the focused editor Find box query to the result panel. |
 | `Search Result Mini Panel: Refresh Last Search` | Re-run the most recent search. |
 | `Search Result Mini Panel: Clear Results` | Clear the result panel. |
 | `Search Result Mini Panel: Reveal Results` | Show the Search Results panel. |
@@ -50,10 +61,12 @@ You can also select text in the editor and run `Search Result Mini Panel: Search
 | `searchResultMiniPanel.defaultSearchScope` | `currentFile` | Default search scope for future UI expansion. |
 | `searchResultMiniPanel.contextLines` | `0` | Reserved for showing context lines around each match. |
 | `searchResultMiniPanel.excludeGlob` | `**/{node_modules,.git,out,dist,build}/**` | Files and folders excluded from workspace search. |
+| `searchResultMiniPanel.enableFindWidgetKeybinding` | `true` | Enable the shortcut that sends the native editor Find query to the panel. |
 
 ## Known Limitations
 
 - The first release uses plain text search from the command input. Case-sensitive, whole-word, and regular expression options are implemented in the service layer and are planned for the panel toolbar.
+- VS Code's stable extension API does not expose the Find Widget's live query object. The Find Widget bridge captures the focused Find input through VS Code commands, restores the clipboard, and then runs the panel search.
 - Workspace search decodes files as UTF-8 and skips likely binary files.
 - Replace and multi-session search result tabs are not included yet.
 
@@ -83,4 +96,4 @@ Open this folder in VS Code and press `F5` to launch an Extension Development Ho
 
 ### 0.1.0
 
-Initial release with current-file, selection, and workspace search, a bottom result panel, local filtering, grouped results, copy/refresh/clear actions, and click-to-jump navigation.
+Initial release with current-file, selection, and workspace search, native Find Widget query capture, a bottom result panel, local filtering, grouped results, copy/refresh/clear actions, and click-to-jump navigation.

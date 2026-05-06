@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { FindWidgetQueryCaptureService } from '../services/FindWidgetQueryCaptureService';
 import { SearchService } from '../services/SearchService';
 import { ResultStore } from '../state/ResultStore';
 import { SearchOptions, SearchRequest, SearchScope } from '../types/search';
@@ -8,7 +9,8 @@ export class SearchController {
 
   constructor(
     private readonly searchService: SearchService,
-    private readonly resultStore: ResultStore
+    private readonly resultStore: ResultStore,
+    private readonly findWidgetQueryCaptureService = new FindWidgetQueryCaptureService()
   ) {}
 
   async searchInCurrentFile(): Promise<void> {
@@ -21,6 +23,22 @@ export class SearchController {
 
   async searchInWorkspace(): Promise<void> {
     await this.runInteractiveSearch('workspace');
+  }
+
+  async searchFromFindWidget(): Promise<void> {
+    const query = await this.findWidgetQueryCaptureService.captureFocusedFindInput();
+    if (!query) {
+      vscode.window.showInformationMessage('Focus the editor Find box and enter a query before sending results to Search Result Mini Panel.');
+      return;
+    }
+
+    await this.executeSearch({
+      id: createRequestId(),
+      query,
+      scope: 'currentFile',
+      options: getSearchOptions(),
+      createdAt: Date.now()
+    });
   }
 
   async refreshLastSearch(): Promise<void> {

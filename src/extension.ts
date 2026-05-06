@@ -29,6 +29,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('searchResultMiniPanel.searchInCurrentFile', () => controller.searchInCurrentFile()),
     vscode.commands.registerCommand('searchResultMiniPanel.searchSelectionInCurrentFile', () => controller.searchSelectionInCurrentFile()),
     vscode.commands.registerCommand('searchResultMiniPanel.searchInWorkspace', () => controller.searchInWorkspace()),
+    vscode.commands.registerCommand('searchResultMiniPanel.searchFromFindWidget', () => controller.searchFromFindWidget()),
     vscode.commands.registerCommand('searchResultMiniPanel.refresh', () => controller.refreshLastSearch()),
     vscode.commands.registerCommand('searchResultMiniPanel.clear', () => controller.clearResults()),
     vscode.commands.registerCommand('searchResultMiniPanel.revealPanel', () => revealResultsPanel())

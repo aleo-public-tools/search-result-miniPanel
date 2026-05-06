@@ -27,12 +27,13 @@
     "onCommand:searchResultMiniPanel.searchInCurrentFile",
     "onCommand:searchResultMiniPanel.searchSelectionInCurrentFile",
     "onCommand:searchResultMiniPanel.searchInWorkspace",
+    "onCommand:searchResultMiniPanel.searchFromFindWidget",
     "onCommand:searchResultMiniPanel.refresh",
     "onCommand:searchResultMiniPanel.clear",
     "onCommand:searchResultMiniPanel.revealPanel",
     "onView:searchResultMiniPanel.resultsView"
   ],
-  "main": "./out/extension.js",
+  "main": "./out/src/extension.js",
   "contributes": {
     "commands": [
       {
@@ -49,6 +50,12 @@
         "command": "searchResultMiniPanel.searchInWorkspace",
         "title": "Search Result Mini Panel: Search In Workspace",
         "category": "Search Result Mini Panel"
+      },
+      {
+        "command": "searchResultMiniPanel.searchFromFindWidget",
+        "title": "Search Result Mini Panel: Show Find Widget Results",
+        "category": "Search Result Mini Panel",
+        "enablement": "findWidgetVisible && inputFocus"
       },
       {
         "command": "searchResultMiniPanel.refresh",
@@ -111,6 +118,14 @@
         }
       ]
     },
+    "keybindings": [
+      {
+        "command": "searchResultMiniPanel.searchFromFindWidget",
+        "key": "ctrl+shift+enter",
+        "mac": "cmd+shift+enter",
+        "when": "findWidgetVisible && inputFocus && config.searchResultMiniPanel.enableFindWidgetKeybinding"
+      }
+    ],
     "configuration": {
       "title": "Search Result Mini Panel",
       "properties": {
@@ -159,6 +174,11 @@
           "type": "string",
           "default": "**/{node_modules,.git,out,dist,build}/**",
           "description": "Default exclude glob used for workspace searches."
+        },
+        "searchResultMiniPanel.enableFindWidgetKeybinding": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the Find Widget shortcut that sends the native editor Find query to Search Result Mini Panel."
         }
       }
     }

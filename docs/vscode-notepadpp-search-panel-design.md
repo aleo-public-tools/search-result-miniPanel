@@ -10,6 +10,7 @@ VS Code 已有内置全局搜索面板，但它偏向完整侧边栏工作流。
 - 用户希望像 Notepad++ 一样看到“文件 -> 匹配行”的紧凑列表。
 - 用户希望搜索结果窗口可固定、可清空、可二次过滤、可点击跳转。
 - 用户希望对当前文件的搜索结果具备轻量、即时、低打扰体验。
+- 用户希望继续使用 VS Code 原生 `Cmd+F` / `Ctrl+F` Find Widget 输入搜索词，并能把同一个搜索词一键发送到插件结果小窗。
 
 ## 2. 产品定位
 
@@ -73,6 +74,18 @@ VS Code 已有内置全局搜索面板，但它偏向完整侧边栏工作流。
 - 过滤仅影响结果展示，不重新扫描文件。
 - 支持按文件路径和匹配行文本过滤。
 
+### 3.5 原生 Find Widget 联动
+
+作为开发者，我希望继续使用 VS Code 原生当前文件搜索框输入搜索词，并能直接触发 Search Result Mini Panel 展示全部匹配行，这样我不需要学习新的搜索入口。
+
+验收标准：
+
+- 用户通过 `Cmd+F` / `Ctrl+F` 打开 VS Code 原生 Find Widget。
+- 用户在 Find Widget 中输入搜索词后，可通过插件快捷键或命令将该搜索词发送到结果小窗。
+- 插件在当前 active editor 中执行搜索，并将结果展示在底部 Panel。
+- 原生 Find Widget 的普通查找行为不被破坏。
+- 插件触发过程不永久污染用户剪贴板。
+
 ## 4. 功能范围
 
 ### 4.1 首版必备功能
@@ -81,6 +94,7 @@ VS Code 已有内置全局搜索面板，但它偏向完整侧边栏工作流。
   - `Search Result Mini Panel: Search In Current File`
   - `Search Result Mini Panel: Search In Workspace`
   - `Search Result Mini Panel: Search Selection In Current File`
+  - `Search Result Mini Panel: Show Find Widget Results`
   - `Search Result Mini Panel: Clear Results`
   - `Search Result Mini Panel: Refresh Last Search`
 - 搜索选项：
@@ -133,6 +147,9 @@ VS Code 已有内置全局搜索面板，但它偏向完整侧边栏工作流。
 ```mermaid
 flowchart TD
     User["用户操作"] --> Commands["VS Code Commands"]
+    User --> FindWidget["VS Code 原生 Find Widget"]
+    FindWidget --> FindWidgetBridge["FindWidgetQueryCaptureService"]
+    FindWidgetBridge --> SearchController
     Commands --> SearchController["SearchController"]
     SearchController --> SearchService["SearchService"]
     SearchController --> ResultStore["ResultStore"]
@@ -168,6 +185,7 @@ flowchart TD
 - `ResultStore`
 - `ResultPanelProvider`
 - `NavigationService`
+- `FindWidgetQueryCaptureService`
 
 ### 7.2 SearchController
 
@@ -189,6 +207,7 @@ class SearchController {
   searchInCurrentFile(): Promise<void>;
   searchSelectionInCurrentFile(): Promise<void>;
   searchInWorkspace(): Promise<void>;
+  searchFromFindWidget(): Promise<void>;
   refreshLastSearch(): Promise<void>;
   clearResults(): void;
 }
@@ -351,6 +370,31 @@ class NavigationService {
 - 使用 `vscode.window.showTextDocument(document, { preview: false })`。
 - 设置 `editor.selection`。
 - 使用 `editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport)`。
+
+### 7.9 FindWidgetQueryCaptureService
+
+文件建议：`src/services/FindWidgetQueryCaptureService.ts`
+
+职责：
+
+- 在 VS Code 原生 Find Widget 聚焦时读取当前输入框内容。
+- 通过 VS Code 命令模拟“全选 + 复制”获取 query。
+- 搜索触发后恢复用户原剪贴板。
+- 将捕获到的 query 交给 `SearchController.searchFromFindWidget()` 执行当前文件搜索。
+
+设计约束：
+
+- VS Code 稳定 Extension API 不暴露 Find Widget 的 live query 对象，因此不能通过公开字段直接读取搜索框内容。
+- 集成入口应绑定在 `findWidgetVisible && inputFocus` when clause 下，确保命令只在 Find Widget 输入框聚焦时触发。
+- 该服务只负责捕获 query，不直接执行搜索、不持久化剪贴板内容。
+
+主要方法：
+
+```ts
+class FindWidgetQueryCaptureService {
+  captureFocusedFindInput(): Promise<string | undefined>;
+}
+```
 
 ## 8. 数据结构设计
 
@@ -625,6 +669,11 @@ type WebviewToExtensionMessage =
     "type": "number",
     "default": 0,
     "description": "Number of context lines shown before and after each match."
+  },
+  "searchResultMiniPanel.enableFindWidgetKeybinding": {
+    "type": "boolean",
+    "default": true,
+    "description": "Enable the shortcut that sends the native editor Find query to the result panel."
   }
 }
 ```
@@ -645,6 +694,7 @@ type WebviewToExtensionMessage =
 - `searchResultMiniPanel.searchInCurrentFile`
 - `searchResultMiniPanel.searchSelectionInCurrentFile`
 - `searchResultMiniPanel.searchInWorkspace`
+- `searchResultMiniPanel.searchFromFindWidget`
 - `searchResultMiniPanel.refresh`
 - `searchResultMiniPanel.clear`
 - `searchResultMiniPanel.revealPanel`
@@ -658,6 +708,7 @@ type WebviewToExtensionMessage =
 - 当前文件搜索：不默认绑定，用户自行配置。
 - 搜索选中文本：可提供建议绑定 `Ctrl+Alt+F` / `Cmd+Alt+F`。
 - 展示结果面板：可提供建议绑定 `Ctrl+Alt+R` / `Cmd+Alt+R`。
+- 原生 Find Widget 联动：建议默认绑定 `Cmd+Shift+Enter` / `Ctrl+Shift+Enter`，when clause 为 `findWidgetVisible && inputFocus && config.searchResultMiniPanel.enableFindWidgetKeybinding`。该快捷键只在 Find Widget 输入框聚焦时生效，避免覆盖编辑器正文快捷键。
 
 ## 14. 文件结构建议
 
@@ -677,6 +728,7 @@ vscode-search-result-mini-panel/
 │   │   ├── WorkspaceSearchEngine.ts
 │   │   └── matcher.ts
 │   ├── services/
+│   │   ├── FindWidgetQueryCaptureService.ts
 │   │   ├── SearchService.ts
 │   │   └── NavigationService.ts
 │   ├── state/
@@ -781,6 +833,33 @@ backend/src/app.ts
 ```
 
 如果只有单根工作区，则展示普通相对路径。
+
+### 16.6 原生 Find Widget 查询捕获
+
+目标体验：
+
+1. 用户按 `Cmd+F` / `Ctrl+F` 打开 VS Code 原生 Find Widget。
+2. 用户在原生搜索框中输入 query。
+3. 用户按 `Cmd+Shift+Enter` / `Ctrl+Shift+Enter`。
+4. 插件读取 Find Widget 输入框内容，并执行当前文件搜索。
+5. 结果展示在底部 Search Results Panel。
+
+实现方式：
+
+- 在 `package.json` 注册 `searchResultMiniPanel.searchFromFindWidget` 命令。
+- 在 `contributes.keybindings` 中使用 `findWidgetVisible && inputFocus` 限定快捷键只在 Find Widget 输入框聚焦时启用。
+- 命令执行时保存当前剪贴板内容。
+- 执行 VS Code 命令 `editor.action.selectAll`，选中 Find Widget 输入框内容。
+- 执行 VS Code 命令 `editor.action.clipboardCopyAction`，将 query 复制到剪贴板。
+- 使用 `vscode.env.clipboard.readText()` 读取 query。
+- 使用 `vscode.env.clipboard.writeText(previousClipboard)` 恢复用户原剪贴板。
+- 将 query 交给 `SearchController`，按 `currentFile` scope 执行搜索。
+
+能力边界：
+
+- 稳定 API 不支持直接订阅原生 Find Widget query 变化，因此插件不能做到“用户每输入一个字符自动同步 Panel”，除非引入不稳定内部 API 或改为自建搜索输入框。
+- 当前集成只读取搜索词；Find Widget 中的大小写、全词、正则、选区搜索等按钮状态无法通过稳定 API 直接读取。首版按插件默认搜索选项执行，后续可提供插件侧选项同步或自定义搜索输入增强。
+- 剪贴板只作为短暂桥接通道，必须在 `finally` 中恢复，避免污染用户剪贴板。
 
 ## 17. 测试方案
 
@@ -953,6 +1032,19 @@ backend/src/app.ts
 - 读取失败时记录 skipped。
 - 后续支持 `jschardet` 或 VS Code 文档打开方式读取。
 
+### 19.5 原生 Find Widget API 限制
+
+风险：
+
+- VS Code 稳定 API 不暴露 Find Widget live query 和按钮状态，直接读取原生搜索框存在能力边界。
+
+应对：
+
+- 使用 `findWidgetVisible && inputFocus` 限定触发环境。
+- 通过“全选 + 复制 + 恢复剪贴板”的方式读取当前 query。
+- 文档中明确该方式只同步搜索词，不同步 Find Widget 的正则、大小写、全词等 UI 状态。
+- 后续可增加插件自有搜索输入栏，或通过 `editor.actions.findWithArgs` 反向把插件查询写入原生 Find Widget。
+
 ## 20. 未来扩展方向
 
 - 替换预览：在结果小窗中显示替换前后差异。
@@ -961,6 +1053,7 @@ backend/src/app.ts
 - 代码上下文：为函数、类、Markdown 标题等结构化上下文分组。
 - Remote 优化：针对 SSH / WSL / Dev Container 优化文件读取策略。
 - 与内置 Search View 联动：从内置搜索复制查询参数到插件面板。
+- 与原生 Find Widget 双向联动：支持从 Panel 查询写入 Find Widget，并在插件 UI 中显式控制大小写、全词和正则选项。
 
 ## 21. 推荐首版实现路线
 
@@ -974,7 +1067,8 @@ backend/src/app.ts
 6. 渲染结果列表。
 7. 点击结果跳转并选中匹配项。
 8. 增加清空和刷新。
-9. 补单元测试。
-10. 再扩展工作区搜索。
+9. 增加原生 Find Widget 查询捕获命令和受限快捷键。
+10. 补单元测试。
+11. 再扩展工作区搜索。
 
 这个顺序能最快验证核心体验：搜索、展示、点击跳转。核心体验稳定后，再投入工作区搜索和大结果集优化会更稳。
