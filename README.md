@@ -19,6 +19,9 @@ VS Code's built-in Search view is powerful, but it lives in the side bar and is 
 - **Workspace safeguards**: skip likely binary files and files above the configured size limit.
 - **Theme-aware UI**: uses VS Code theme colors for light, dark, and high-contrast themes.
 
+![Search Result Mini Panel icon search in current file](resources/search_01.png)
+![Search Result Mini Panel icon search in current panel](resources/search_in_search_001.png)
+
 ## Getting Started
 
 1. Open the Command Palette.
@@ -63,9 +66,6 @@ This keeps the normal VS Code Find experience intact while adding a Notepad++ st
 | Send native Find query to panel | `Cmd+Shift+Enter` | `Ctrl+Shift+Enter` |
 
 When text is selected, the current-file shortcut searches immediately with that selected text. No input box or Enter key is required.
-
-![Search Result Mini Panel icon search in current file](resources/search_01.png)
-![Search Result Mini Panel icon search in current panel](resources/search_in_search_001.png)
 
 You can customize every shortcut in VS Code:
 
