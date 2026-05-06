@@ -1,0 +1,178 @@
+{
+  "name": "search-result-mini-panel",
+  "displayName": "Search Result Mini Panel",
+  "description": "A Notepad++ style search results panel for VS Code.",
+  "version": "0.1.0",
+  "publisher": "local",
+  "license": "MIT",
+  "icon": "resources/icon.png",
+  "engines": {
+    "vscode": "^1.92.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "search",
+    "find",
+    "results",
+    "notepad++",
+    "navigation"
+  ],
+  "galleryBanner": {
+    "color": "#102A43",
+    "theme": "dark"
+  },
+  "activationEvents": [
+    "onCommand:searchResultMiniPanel.searchInCurrentFile",
+    "onCommand:searchResultMiniPanel.searchSelectionInCurrentFile",
+    "onCommand:searchResultMiniPanel.searchInWorkspace",
+    "onCommand:searchResultMiniPanel.refresh",
+    "onCommand:searchResultMiniPanel.clear",
+    "onCommand:searchResultMiniPanel.revealPanel",
+    "onView:searchResultMiniPanel.resultsView"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "searchResultMiniPanel.searchInCurrentFile",
+        "title": "Search Result Mini Panel: Search In Current File",
+        "category": "Search Result Mini Panel"
+      },
+      {
+        "command": "searchResultMiniPanel.searchSelectionInCurrentFile",
+        "title": "Search Result Mini Panel: Search Selection In Current File",
+        "category": "Search Result Mini Panel"
+      },
+      {
+        "command": "searchResultMiniPanel.searchInWorkspace",
+        "title": "Search Result Mini Panel: Search In Workspace",
+        "category": "Search Result Mini Panel"
+      },
+      {
+        "command": "searchResultMiniPanel.refresh",
+        "title": "Search Result Mini Panel: Refresh Last Search",
+        "category": "Search Result Mini Panel",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "searchResultMiniPanel.clear",
+        "title": "Search Result Mini Panel: Clear Results",
+        "category": "Search Result Mini Panel",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "searchResultMiniPanel.revealPanel",
+        "title": "Search Result Mini Panel: Reveal Results",
+        "category": "Search Result Mini Panel"
+      }
+    ],
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "searchResultMiniPanel",
+          "title": "Search Results",
+          "icon": "resources/search.svg"
+        }
+      ]
+    },
+    "views": {
+      "searchResultMiniPanel": [
+        {
+          "id": "searchResultMiniPanel.resultsView",
+          "name": "Results",
+          "type": "webview"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "searchResultMiniPanel.refresh",
+          "when": "view == searchResultMiniPanel.resultsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "searchResultMiniPanel.clear",
+          "when": "view == searchResultMiniPanel.resultsView",
+          "group": "navigation@2"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "searchResultMiniPanel.searchSelectionInCurrentFile",
+          "when": "editorHasSelection",
+          "group": "navigation"
+        },
+        {
+          "command": "searchResultMiniPanel.searchInCurrentFile",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Search Result Mini Panel",
+      "properties": {
+        "searchResultMiniPanel.maxFileSizeBytes": {
+          "type": "number",
+          "default": 2097152,
+          "minimum": 1024,
+          "description": "Maximum file size in bytes for workspace search."
+        },
+        "searchResultMiniPanel.maxResults": {
+          "type": "number",
+          "default": 10000,
+          "minimum": 1,
+          "description": "Maximum total matches returned by one search."
+        },
+        "searchResultMiniPanel.maxMatchesPerFile": {
+          "type": "number",
+          "default": 1000,
+          "minimum": 1,
+          "description": "Maximum matches returned per file."
+        },
+        "searchResultMiniPanel.maxConcurrentFiles": {
+          "type": "number",
+          "default": 8,
+          "minimum": 1,
+          "maximum": 32,
+          "description": "Maximum number of workspace files searched concurrently."
+        },
+        "searchResultMiniPanel.defaultSearchScope": {
+          "type": "string",
+          "enum": [
+            "currentFile",
+            "workspace"
+          ],
+          "default": "currentFile",
+          "description": "Default search scope."
+        },
+        "searchResultMiniPanel.contextLines": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Number of context lines shown before and after each match."
+        },
+        "searchResultMiniPanel.excludeGlob": {
+          "type": "string",
+          "default": "**/{node_modules,.git,out,dist,build}/**",
+          "description": "Default exclude glob used for workspace searches."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node --test out/test/*.test.js",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.92.0",
+    "@vscode/test-electron": "^2.4.1",
+    "typescript": "^5.9.3"
+  }
+}
