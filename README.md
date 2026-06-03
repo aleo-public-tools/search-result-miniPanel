@@ -1,5 +1,7 @@
 # Search Result Mini Panel
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 ![Search Result Mini Panel icon](resources/icon.png)
 
 Bring a Notepad++ style search result window to VS Code. Search the current file, selection, or workspace, then review every matching line in a compact bottom panel and jump straight to the exact match with one click.
