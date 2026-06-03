@@ -14,6 +14,7 @@ export function activate(context: vscode.ExtensionContext): void {
     context.extensionUri,
     resultStore,
     navigationService,
+    (query, scope) => controller.searchFromPanel(query, scope),
     () => controller.refreshLastSearch(),
     () => controller.clearResults()
   );
@@ -34,6 +35,11 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('searchResultMiniPanel.clear', () => controller.clearResults()),
     vscode.commands.registerCommand('searchResultMiniPanel.revealPanel', () => revealResultsPanel())
   );
+
+  const config = vscode.workspace.getConfiguration('searchResultMiniPanel');
+  if (config.get<boolean>('revealOnStartup')) {
+    void revealResultsPanel();
+  }
 }
 
 export function deactivate(): void {}

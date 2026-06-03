@@ -1,5 +1,8 @@
 (function () {
   const vscode = acquireVsCodeApi();
+  const searchForm = document.getElementById('searchForm');
+  const searchInput = document.getElementById('searchInput');
+  const workspaceScopeInput = document.getElementById('workspaceScopeInput');
   const summary = document.getElementById('summary');
   const refreshButton = document.getElementById('refreshButton');
   const clearButton = document.getElementById('clearButton');
@@ -19,6 +22,22 @@
   let filterText = '';
   let selectedMatchId;
 
+  searchForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const query = searchInput.value.trim();
+    if (!query) {
+      searchInput.focus();
+      return;
+    }
+    post({
+      type: 'search',
+      query,
+      scope: workspaceScopeInput.checked ? 'workspace' : 'currentFile'
+    });
+  });
+  workspaceScopeInput.addEventListener('change', () => {
+    searchInput.placeholder = workspaceScopeInput.checked ? 'Search workspace' : 'Search current file';
+  });
   refreshButton.addEventListener('click', () => post({ type: 'refresh' }));
   clearButton.addEventListener('click', () => post({ type: 'clear' }));
   expandButton.addEventListener('click', () => {
@@ -60,6 +79,13 @@
     if (message.type === 'stateChanged') {
       state = message.state;
       selectedMatchId = state.viewState.selectedMatchId;
+      if (state.lastRequest?.query) {
+        searchInput.value = state.lastRequest.query;
+      }
+      if (state.lastRequest?.scope) {
+        workspaceScopeInput.checked = state.lastRequest.scope === 'workspace';
+        searchInput.placeholder = workspaceScopeInput.checked ? 'Search workspace' : 'Search current file';
+      }
       render();
     }
   });

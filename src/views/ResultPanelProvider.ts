@@ -15,6 +15,7 @@ export class ResultPanelProvider implements vscode.WebviewViewProvider {
     private readonly extensionUri: vscode.Uri,
     private readonly resultStore: ResultStore,
     private readonly navigationService: NavigationService,
+    private readonly onSearch: (query: string, scope: 'currentFile' | 'workspace') => Promise<void>,
     private readonly onRefresh: () => Promise<void>,
     private readonly onClear: () => void
   ) {
@@ -47,6 +48,9 @@ export class ResultPanelProvider implements vscode.WebviewViewProvider {
         await this.navigationService.openMatch(match);
         break;
       }
+      case 'search':
+        await this.onSearch(message.query, message.scope);
+        break;
       case 'refresh':
         await this.onRefresh();
         break;
@@ -92,6 +96,14 @@ export class ResultPanelProvider implements vscode.WebviewViewProvider {
 </head>
 <body>
   <main class="app">
+    <form class="searchBar" id="searchForm">
+      <input id="searchInput" type="search" placeholder="Search current file" aria-label="Search query">
+      <label class="scopeToggle" title="Search the whole workspace">
+        <input id="workspaceScopeInput" type="checkbox">
+        <span>Workspace</span>
+      </label>
+      <button id="searchButton" type="submit">Search</button>
+    </form>
     <header class="toolbar">
       <div class="summary" id="summary">Search Results</div>
       <div class="actions">

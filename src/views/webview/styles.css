@@ -33,8 +33,17 @@ button:hover {
 
 .app {
   display: grid;
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-rows: auto auto auto auto 1fr;
   min-height: 100vh;
+}
+
+.searchBar {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--vscode-panel-border);
 }
 
 .toolbar,
@@ -61,12 +70,14 @@ button:hover {
 }
 
 .actions button,
-.filterRow button {
+.filterRow button,
+.searchBar button {
   min-height: 24px;
   padding: 2px 8px;
 }
 
-.filterRow input {
+.filterRow input,
+.searchBar input[type='search'] {
   flex: 1;
   min-width: 120px;
   height: 26px;
@@ -77,7 +88,22 @@ button:hover {
   padding: 2px 8px;
 }
 
+.scopeToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  color: var(--vscode-foreground);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.scopeToggle input {
+  margin: 0;
+}
+
 .filterRow input:focus,
+.searchBar input:focus,
 button:focus {
   outline: 1px solid var(--vscode-focusBorder);
   outline-offset: 1px;

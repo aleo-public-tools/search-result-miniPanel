@@ -13,26 +13,40 @@ VS Code's built-in Search view is powerful, but it lives in the side bar and is 
 - **Notepad++ style result panel**: matched lines are grouped by file in a bottom Panel view.
 - **Click-to-jump navigation**: open the source file, reveal the match, and select the matched range.
 - **Native Find Widget bridge**: press `Cmd+F`, type in VS Code's editor Find box, then send that query to the result panel.
+- **Panel search bar**: search directly from the `Search Results` panel, with current-file search as the default and a `Workspace` checkbox for workspace-wide search.
 - **Flexible search scope**: search the current file, the current selection, or the whole workspace.
 - **Local result filtering**: narrow visible results by file path or line text without running a new search.
 - **Compact file groups**: expand, collapse, refresh, clear, and copy visible results.
 - **Workspace safeguards**: skip likely binary files and files above the configured size limit.
 - **Theme-aware UI**: uses VS Code theme colors for light, dark, and high-contrast themes.
 
+![Search Result Mini Panel icon search by panel button](resources/in_panel_result.png)
 ![Search Result Mini Panel icon search in current file](resources/search_01.png)
 ![Search Result Mini Panel icon search in current panel](resources/search_in_search_001.png)
 
 ## Getting Started
 
 1. Open the Command Palette.
-2. Run `Search Result Mini Panel: Search In Current File` or `Search Result Mini Panel: Search In Workspace`.
-3. Enter your search text.
-4. Review matches in the `Search Results` panel.
+2. Run `Search Result Mini Panel: Reveal Results`.
+3. Enter your search text in the `Search Results` panel search bar.
+4. Keep `Workspace` unchecked to search the current file, or check it to search the whole workspace.
 5. Click any matched line to jump to the source location.
 
 Tip: if you select text in the editor and run `Search Result Mini Panel: Search In Current File`, the extension searches immediately with the selected text as the query.
 
 You can also select text in the editor and run `Search Result Mini Panel: Search Selection In Current File`.
+
+## Panel Search Workflow
+
+The `Search Results` panel includes a built-in search bar so you can search without remembering command names or keyboard shortcuts.
+
+1. Open the `Search Results` panel.
+2. Type a query in the search bar.
+3. Press `Enter` or click `Search`.
+4. Leave `Workspace` unchecked to search the active editor.
+5. Check `Workspace` to search across the current workspace.
+
+The panel keeps the last query in the search box after a search, so you can quickly switch between current-file and workspace scope.
 
 ## Native Find Widget Workflow
 
@@ -86,6 +100,7 @@ If you want to define all shortcuts yourself, set `searchResultMiniPanel.enableD
 | `searchResultMiniPanel.defaultSearchScope` | `currentFile` | Default search scope for future UI expansion. |
 | `searchResultMiniPanel.contextLines` | `0` | Reserved for showing context lines around each match. |
 | `searchResultMiniPanel.excludeGlob` | `**/{node_modules,.git,out,dist,build}/**` | Files and folders excluded from workspace search. |
+| `searchResultMiniPanel.revealOnStartup` | `false` | Reveal the Search Results panel when VS Code finishes starting up. |
 | `searchResultMiniPanel.enableDefaultKeybindings` | `true` | Enable the default shortcut set for panel commands. |
 | `searchResultMiniPanel.enableFindWidgetKeybinding` | `true` | Enable the shortcut that sends the native editor Find query to the panel. |
 
@@ -119,6 +134,12 @@ npm test
 Open this folder in VS Code and press `F5` to launch an Extension Development Host.
 
 ## Release Notes
+
+### 0.2.0
+
+Added a search bar directly inside the `Search Results` panel. The panel now supports searching the current file by default, with a `Workspace` checkbox to switch to workspace search, reducing the need to remember command palette entries or keyboard shortcuts.
+
+Added `searchResultMiniPanel.revealOnStartup`, an optional setting for revealing the `Search Results` panel after VS Code starts. It is disabled by default.
 
 ### 0.1.0
 

@@ -103,6 +103,7 @@ export type ExtensionToWebviewMessage =
 
 export type WebviewToExtensionMessage =
   | { type: 'openMatch'; matchId: string }
+  | { type: 'search'; query: string; scope: 'currentFile' | 'workspace' }
   | { type: 'refresh' }
   | { type: 'clear' }
   | { type: 'copyResults'; visibleOnly: boolean; text?: string }

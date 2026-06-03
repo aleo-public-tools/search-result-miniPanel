@@ -2,8 +2,8 @@
   "name": "search-result-mini-panel",
   "displayName": "Search Result Mini Panel",
   "description": "A Notepad++ style search results panel for VS Code.",
-  "version": "0.1.0",
-  "publisher": "local",
+  "version": "0.2.0",
+  "publisher": "aleo-private-using",
   "license": "MIT",
   "icon": "resources/icon.png",
   "engines": {
@@ -24,6 +24,7 @@
     "theme": "dark"
   },
   "activationEvents": [
+    "onStartupFinished",
     "onCommand:searchResultMiniPanel.searchInCurrentFile",
     "onCommand:searchResultMiniPanel.searchSelectionInCurrentFile",
     "onCommand:searchResultMiniPanel.searchInWorkspace",
@@ -199,6 +200,11 @@
           "default": "**/{node_modules,.git,out,dist,build}/**",
           "description": "Default exclude glob used for workspace searches."
         },
+        "searchResultMiniPanel.revealOnStartup": {
+          "type": "boolean",
+          "default": false,
+          "description": "Reveal the Search Results panel when VS Code finishes starting up."
+        },
         "searchResultMiniPanel.enableDefaultKeybindings": {
           "type": "boolean",
           "default": true,
@@ -223,5 +229,9 @@
     "@types/vscode": "^1.92.0",
     "@vscode/test-electron": "^2.4.1",
     "typescript": "^5.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aleo-public-tools/search-result-miniPanel.git"
   }
 }

@@ -37,6 +37,22 @@ export class SearchController {
     await this.runInteractiveSearch('workspace');
   }
 
+  async searchFromPanel(query: string, scope: Extract<SearchScope, 'currentFile' | 'workspace'>): Promise<void> {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      vscode.window.showInformationMessage('Enter a query before searching.');
+      return;
+    }
+
+    await this.executeSearch({
+      id: createRequestId(),
+      query: trimmedQuery,
+      scope,
+      options: getSearchOptions(),
+      createdAt: Date.now()
+    });
+  }
+
   async searchFromFindWidget(): Promise<void> {
     const query = await this.findWidgetQueryCaptureService.captureFocusedFindInput();
     if (!query) {
