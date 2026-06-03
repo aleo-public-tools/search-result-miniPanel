@@ -100,7 +100,7 @@ If you want to define all shortcuts yourself, set `searchResultMiniPanel.enableD
 | `searchResultMiniPanel.maxMatchesPerFile` | `1000` | Maximum matches returned per file. |
 | `searchResultMiniPanel.maxConcurrentFiles` | `8` | Number of workspace files searched concurrently. |
 | `searchResultMiniPanel.defaultSearchScope` | `currentFile` | Default search scope for future UI expansion. |
-| `searchResultMiniPanel.contextLines` | `0` | Reserved for showing context lines around each match. |
+| `searchResultMiniPanel.contextLines` | `0` | Number of context lines shown before and after each match. |
 | `searchResultMiniPanel.excludeGlob` | `**/{node_modules,.git,out,dist,build}/**` | Files and folders excluded from workspace search. |
 | `searchResultMiniPanel.revealOnStartup` | `false` | Reveal the Search Results panel when VS Code finishes starting up. |
 | `searchResultMiniPanel.enableDefaultKeybindings` | `true` | Enable the default shortcut set for panel commands. |
@@ -136,6 +136,10 @@ npm test
 Open this folder in VS Code and press `F5` to launch an Extension Development Host.
 
 ## Release Notes
+
+### 0.2.1
+
+Implemented `searchResultMiniPanel.contextLines`. When set above `0`, each match displays the configured number of surrounding lines, and thin separators are shown between match blocks to make contextual results easier to scan.
 
 ### 0.2.0
 

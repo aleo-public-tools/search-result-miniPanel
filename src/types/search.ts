@@ -39,6 +39,11 @@ export interface PreviewRange {
   end: number;
 }
 
+export interface SearchContextLine {
+  line: number;
+  text: string;
+}
+
 export interface SearchMatch {
   id: string;
   uri: string;
@@ -49,6 +54,8 @@ export interface SearchMatch {
   previewText: string;
   matchText: string;
   rangesInPreview: PreviewRange[];
+  contextBefore: SearchContextLine[];
+  contextAfter: SearchContextLine[];
 }
 
 export interface FileSearchResult {

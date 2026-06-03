@@ -132,7 +132,6 @@ button:focus {
 
 .fileHeader,
 .matchRow {
-  display: grid;
   width: 100%;
   min-width: 0;
   border: 0;
@@ -143,6 +142,7 @@ button:focus {
 }
 
 .fileHeader {
+  display: grid;
   grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: center;
   gap: 6px;
@@ -178,17 +178,36 @@ button:focus {
   padding-bottom: 2px;
 }
 
+.matchList.withContextSeparators .matchRow + .matchRow {
+  border-top: 1px solid var(--vscode-panel-border);
+}
+
 .matchRow {
-  grid-template-columns: 74px minmax(0, 1fr);
-  align-items: baseline;
-  gap: 8px;
+  display: block;
   min-height: 24px;
-  padding: 2px 10px 2px 34px;
+  padding: 1px 0;
 }
 
 .matchRow.selected {
   color: var(--vscode-list-activeSelectionForeground);
   background: var(--vscode-list-activeSelectionBackground);
+}
+
+.previewLine {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
+  min-height: 20px;
+  padding: 0 10px 0 34px;
+}
+
+.matchLine {
+  min-height: 22px;
+}
+
+.contextLine {
+  color: var(--vscode-descriptionForeground);
 }
 
 .location {
@@ -199,7 +218,8 @@ button:focus {
   white-space: nowrap;
 }
 
-.selected .location {
+.selected .location,
+.selected .contextLine {
   color: inherit;
 }
 

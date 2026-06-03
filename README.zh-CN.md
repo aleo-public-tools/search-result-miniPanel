@@ -100,7 +100,7 @@ VS Code 内置搜索很强大，但它位于侧边栏，更适合完整的工作
 | `searchResultMiniPanel.maxMatchesPerFile` | `1000` | 单个文件返回的最大匹配数。 |
 | `searchResultMiniPanel.maxConcurrentFiles` | `8` | 工作区搜索时并发搜索的文件数量。 |
 | `searchResultMiniPanel.defaultSearchScope` | `currentFile` | 为后续 UI 扩展保留的默认搜索范围。 |
-| `searchResultMiniPanel.contextLines` | `0` | 为匹配项展示前后上下文行数保留。 |
+| `searchResultMiniPanel.contextLines` | `0` | 每个匹配项前后展示的上下文行数。 |
 | `searchResultMiniPanel.excludeGlob` | `**/{node_modules,.git,out,dist,build}/**` | 工作区搜索默认排除的文件和文件夹。 |
 | `searchResultMiniPanel.revealOnStartup` | `false` | VS Code 启动完成后自动显示 Search Results 面板。 |
 | `searchResultMiniPanel.enableDefaultKeybindings` | `true` | 启用扩展默认快捷键集合。 |
@@ -136,6 +136,10 @@ npm test
 在 VS Code 中打开此文件夹并按 `F5`，即可启动 Extension Development Host。
 
 ## 发布说明
+
+### 0.2.1
+
+实现 `searchResultMiniPanel.contextLines` 配置。设置为大于 `0` 时，每个匹配项会显示配置数量的前后上下文行，并在匹配块之间展示细分割线，方便浏览带上下文的搜索结果。
 
 ### 0.2.0
 

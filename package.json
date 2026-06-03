@@ -2,7 +2,7 @@
   "name": "search-result-mini-panel",
   "displayName": "Search Result Mini Panel",
   "description": "A Notepad++ style search results panel for VS Code.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "aleo-private-using",
   "license": "MIT",
   "icon": "resources/icon.png",

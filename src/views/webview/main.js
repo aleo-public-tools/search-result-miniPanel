@@ -187,6 +187,9 @@
     if (!collapsed) {
       const list = document.createElement('div');
       list.className = 'matchList';
+      if (hasContextLinesEnabled()) {
+        list.classList.add('withContextSeparators');
+      }
       for (const match of file.matches) {
         list.appendChild(renderMatch(match));
       }
@@ -212,16 +215,33 @@
       post({ type: 'openMatch', matchId: match.id });
     });
 
+    for (const contextLine of match.contextBefore || []) {
+      row.appendChild(renderPreviewLine(contextLine.line, undefined, contextLine.text, [], true));
+    }
+
+    row.appendChild(renderPreviewLine(match.line, match.character, match.previewText, match.rangesInPreview, false));
+
+    for (const contextLine of match.contextAfter || []) {
+      row.appendChild(renderPreviewLine(contextLine.line, undefined, contextLine.text, [], true));
+    }
+
+    return row;
+  }
+
+  function renderPreviewLine(line, character, text, ranges, isContext) {
+    const lineRow = document.createElement('span');
+    lineRow.className = isContext ? 'previewLine contextLine' : 'previewLine matchLine';
+
     const location = document.createElement('span');
     location.className = 'location';
-    location.textContent = `${match.line + 1}:${match.character + 1}`;
+    location.textContent = character === undefined ? `${line + 1}` : `${line + 1}:${character + 1}`;
 
     const preview = document.createElement('span');
     preview.className = 'preview';
-    appendHighlightedPreview(preview, match.previewText, match.rangesInPreview);
+    appendHighlightedPreview(preview, text, ranges);
 
-    row.append(location, preview);
-    return row;
+    lineRow.append(location, preview);
+    return lineRow;
   }
 
   function appendHighlightedPreview(parent, text, ranges) {
@@ -254,7 +274,7 @@
         const pathMatches = file.workspaceRelativePath.toLowerCase().includes(filterText);
         const matches = pathMatches
           ? file.matches
-          : file.matches.filter(match => match.previewText.toLowerCase().includes(filterText));
+          : file.matches.filter(match => getMatchSearchText(match).includes(filterText));
         return {
           ...file,
           matches
@@ -296,6 +316,10 @@
     return getVisibleFiles().flatMap(file => isCollapsed(file.uri) ? [] : file.matches.map(match => match.id));
   }
 
+  function hasContextLinesEnabled() {
+    return Number(state.lastRequest?.options?.contextLines || 0) > 0;
+  }
+
   function toggleFile(uri) {
     const collapsed = new Set(state.viewState.collapsedFiles || []);
     if (collapsed.has(uri)) {
@@ -325,10 +349,22 @@
     for (const file of getVisibleFiles()) {
       lines.push(`${file.workspaceRelativePath} (${file.matches.length})`);
       for (const match of file.matches) {
+        for (const contextLine of match.contextBefore || []) {
+          lines.push(`  ${contextLine.line + 1}  ${contextLine.text}`);
+        }
         lines.push(`  ${match.line + 1}:${match.character + 1}  ${match.previewText}`);
+        for (const contextLine of match.contextAfter || []) {
+          lines.push(`  ${contextLine.line + 1}  ${contextLine.text}`);
+        }
       }
     }
     return lines.join('\n');
+  }
+
+  function getMatchSearchText(match) {
+    const contextBefore = (match.contextBefore || []).map(line => line.text);
+    const contextAfter = (match.contextAfter || []).map(line => line.text);
+    return [...contextBefore, match.previewText, ...contextAfter].join('\n').toLowerCase();
   }
 
   function emptyBlock(text) {
